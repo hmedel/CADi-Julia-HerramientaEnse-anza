@@ -14,179 +14,197 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ f15ac4e2-96ef-11ed-28e6-f97783f7fd33
+# ╔═╡ d761da04-b71a-4b95-84cb-0d541a8eec35
 begin
 	using Plots
 	using PlutoUI
 end
 
-# ╔═╡ 3dd7bab3-2e6d-4f6d-b86f-f215f73d3077
-md"""
-# Polarization
+# ╔═╡ d4f2e13a-6463-404b-8658-3b69d1f19533
+html"""<style>
+main {
+    max-width: 1050px;
+}
 """
 
-# ╔═╡ 48cf369f-1b8d-41c7-b7bb-abcf64d3d3ed
+# ╔═╡ 5dd54161-3b2c-4162-8cd6-0ceea61d3483
 md"""
-## Cartesian basis
-In this notebook we want to explore the vectorial nature of an electromagnetic wave. For that let us express an electromagnetic wave as
+# Laser alignment
 
-$\vec{E} = E_{0x} \cos(kz - \omega t)\hat{e}_x + E_{0y} \cos(kz - \omega t + \phi_y)\hat{e}_y,$
-where we have written the field in the cartesian polarization basis.
+In this notebook we want to explore the idea of "walking" a beam.  This technique is typically used for alignment.
 
-In the numerical evaluation the blue line represents the $x$ component of the field, and the red plot represents the $y$ component.  Adjust the sliders to explore different polarization states.
+For this, we need a couple of pkg in our Pluto notebook.
 """
 
-# ╔═╡ 5b35cba4-226b-4aa3-abb9-d70483880ea5
-@bind go1 Button("Restart")
+# ╔═╡ 01828d9d-ceaf-4162-8df6-9a3c32e68bdf
+md"""
+Another important thing is to define an aperture funcion and proper numerical grid for the apertures planes.  We do that in the following (hidden) cells.
+"""
 
-# ╔═╡ 293ecaff-65f9-4013-a056-0ad375d3d769
+# ╔═╡ a8b0697f-0e02-4003-8336-86710d527884
 begin
-	go1
+	# Size of numerical window -- Transverse plane
+	w0 = 1.0
+	xmax = 2.0*w0
+	pointsC = 256
 	
-	# RUN THIS CELL (shift-enter) BEFORE START 
-	Ex = Float64[]
-	Ey = Float64[]
-	tt = Float64[]
+	# Generates ranges for xs and ys
+	xs = xmax*(2/pointsC)*collect(range(-pointsC/2,length=pointsC,stop=pointsC/2-1))
+	ys = xmax*(2/pointsC)*collect(range(-pointsC/2,length=pointsC,stop=pointsC/2-1))
+	
+	# Generates matrices Matlab-style
+	mx, ny = length(xs), length(ys)
+	Xs = reshape(xs, mx, 1)
+	Ys = reshape(ys, 1, ny)
 
-	deltaT = 1/20
-	@bind ticks Clock(deltaT,true)
-end
+	# grid definition -- optical-table
+	xg = collect(0:1:55)
+	yg = collect(-1:1:9)
+	Xg = repeat(xg',11,1)
+	Yg = repeat(yg,1,56)
+end;
 
-# ╔═╡ 6b023357-5e1c-4a53-aa37-b2c007d8fe27
-md"""
-E0x $(@bind E0x Slider(0.0:0.01:0.5, default=0.25, show_value=true))
-
-E0y $(@bind E0y Slider(0.0:0.01:0.5, default=0.25, show_value=true))
-
-phiy $(@bind phiy Slider(0.0:pi/64:pi, default=0.0, show_value=true))
-
-angle1 $(@bind anA Slider(0.0:1.0:90, default=45.0, show_value=true))
-angle2 $(@bind anP Slider(0.0:1.0:90, default=45.0, show_value=true))
-"""
-
-# ╔═╡ a60dd512-8c5d-4209-b527-4c0474b12566
+# ╔═╡ 5e4449d7-aed7-497c-967d-b8f3d39d70c3
 begin
-	# Parameters
-	z = 0.0
-	c = 4
-	lambda = 1.0
-	f = c/lambda
-	k = 2.0*pi/lambda
-	w = 2.0*pi*f
-
-	# Electric field components
-	t = ticks*deltaT/30
-	push!(tt,t)
-	push!(Ex,E0x * cos(k*z - w*t))
-	push!(Ey,E0y * cos(k*z - w*t + phiy))
-
-	if ticks==1
-		p = Plots.plot(proj_type = :persp)
-	end
-	
-	# How fast?
-	visualfactor=1/7
-	p = Plots.plot(Ex,Ey,w*visualfactor*tt,color=:black,linewidth=1.0,leg=:false)	
-
-	p = Plots.plot3d!([Ex; Ex[end]], [ones(size(Ey)); Ey[end]],[w*tt*visualfactor;w*tt[end]*visualfactor],
-		color=:blue,linewidth=0.5,leg=:false)
-	
-	p = Plots.plot3d!([-ones(size(Ex)); Ex[end]], [Ey; Ey[end]],[w*tt*visualfactor;w*tt[end]*visualfactor],
-		color=:red,linewidth=0.5,leg=:false)
-	zmax1=10
-	if w*tt[end]*visualfactor>10
-		zmax1=w*tt[end]*visualfactor+0.1
-	end
-	Plots.plot(p,xlims=[-1,1],ylims=[-1,1],zlims=[0,zmax1],
-			   proj_type = :persp, aspect_ratio=1,camera=(anA,anP),size=(600,600))
-end
-
-# ╔═╡ d8ad6dfc-8aa3-4e80-a10f-438a27ae7b80
-md"""
-## Circular basis
-
-Let us express an electromagnetic wave as
-
-$\vec{E} = E_{0L}\hat{e}_L + E_{0R} \exp(i\phi_R)\hat{e}_R,$
-where we have expressed the field in the circular polarization basis.
-"""
-
-# ╔═╡ cdf04820-5195-4058-8fbd-01e6d763a1b9
-@bind go2 Button("Restart")
-
-# ╔═╡ ce701571-a260-4cdb-84ec-e4fedccedc59
-begin
-	go2
-	
-	# RUN THIS CELL (shift-enter) BEFORE START 
-	ExL = Complex[]
-	EyL = Complex[]
-	ExR = Complex[]
-	EyR = Complex[]
-	ttC = Float64[]
-
-	deltaTC = 1/20
-	@bind ticksC Clock(deltaTC,true)
-end
-
-# ╔═╡ 6f34c2b1-da5b-40ad-ad48-447a7a238dff
-md"""
-E0L $(@bind E0L Slider(0.0:0.01:1.5, default=1.0, show_value=true))
-
-E0R $(@bind E0R Slider(0.0:0.01:1.5, default=1.0, show_value=true))
-
-phiR $(@bind phiR Slider(0.0:pi/64:pi, default=0.0, show_value=true))
-
-anglec1 $(@bind ancA Slider(0.0:1.0:90, default=45.0, show_value=true))
-anglec2 $(@bind ancP Slider(0.0:1.0:90, default=45.0, show_value=true))
-"""
-
-# ╔═╡ 08c3a497-ec85-4992-8a1f-aa806a62d273
-begin
-	# Parameters
-	zC = 0.0
-	cC = 4
-	lambdaC = 1.0
-	fC = cC/lambdaC
-	kC = 2.0*pi/lambdaC
-	wC = 2.0*pi*fC
-
-	# Electric field components
-	tC = ticksC*deltaT/30
-	push!(ttC,tC)
-	push!(ExL,E0L * (1/sqrt(2)) * exp(im*(kC*zC - wC*tC)))
-	push!(EyL,-E0L*im*(1/sqrt(2)) * exp(im*(kC*zC - wC*tC)))
-	push!(ExR,E0R * (1/sqrt(2)) * exp(im*(kC*zC - wC*tC + phiR)))
-	push!(EyR,E0R*im*(1/sqrt(2)) * exp(im*(kC*zC - wC*tC + phiR)))
-
-	EX2 = (ExL .+ ExR)
-	EY2 = (EyL .+ EyR)
-	
-	if ticksC==1
-		p2 = Plots.plot()
+	# Freespace propagation
+	function freespace(x0,y0,xf,yf,cl)
+    	plot!([x0, xf], [y0, yf], color=cl,linewidth=3)
 	end
 
-	visualfactorC=1/7
-	p2 = Plots.plot3d(real.(EX2), real.(EY2),wC*visualfactorC*ttC,
-					  color=:black,linewidth=1.0,leg=:false)
-	
-	p2 = Plots.plot3d!([real.(ExL).-4.0; real(ExL[end]); 0.0], 
-					   [real.(EyL); real(EyL[end]); 0.0],
-				       [wC*visualfactorC*ttC; wC*visualfactorC*ttC[end]; 
-                        wC*visualfactorC*ttC[end]], 
-						color=:blue,linewidth=0.5,leg=:false)
-	
-	p2 = Plots.plot3d!([real.(ExR); real(ExR[end]);0.0], 
-						[real.(EyR).+4.0;real(EyR[end]);0.0],
-						[wC*visualfactorC*ttC; wC*visualfactorC*ttC[end]; 
-						 wC*visualfactorC*ttC[end]],
-						 color=:red,linewidth=0.5,leg=:false)
-	zmaxx=10
-	if wC*visualfactorC*ttC[end]>10
-		zmaxx = wC*visualfactorC*ttC[end]+0.1
+	# Output from mirror
+	function mirror(th,thmirror)
+	    phi = 2thmirror - th
+	end	
+
+	# Draw mirror
+	function drawmirror(xm,ym,thmirror)
+	    rs = [-1.0, 1.0]./1
+	    rx = rs.*cosd(thmirror) .+ xm
+	    ry = rs.*sind(thmirror) .+ ym
+	    plot!(rx,ry,color=:black,linewidth=5)
 	end
-	Plots.plot(p2,xlims=[-5.0,5.0],ylims=[-5.0,5.0],zlims=[0,zmaxx],
-			    proj_type = :persp, aspect_ratio=1,camera=(ancA,ancP),size=(600,600))
+
+	# Draw aperture
+	function drawaperture(xm,ym,thmirror)
+	    rs = [-1.0, 1.0]./1
+	    rx = rs.*cosd(thmirror) .+ xm
+	    ry = rs.*sind(thmirror) .+ ym
+	    plot!(rx,ry,color=:blue,linewidth=4)
+	end
+
+	# Collision checker
+	function collision(xm,ym,thmirror,x0,y0,xf,yf)
+	    
+	    rs = [-1.0, 1.0]./1
+	    rx = rs.*cosd(thmirror) .+ xm
+	    ry = rs.*sind(thmirror) .+ ym
+	    
+	    m1 = (yf-y0)/(xf-x0)
+	    m2 = tand(thmirror)
+	    
+	    xhit = (m1*x0 - m2*rx[1] + ry[1] - y0)/(m1-m2)
+	    yhit = m2*(xhit-rx[1])+ry[1]
+	    
+	    xf = xhit * (xhit>rx[1]) * (xhit<rx[2]) + 
+	         xf * ((xhit<rx[1]) + (xhit>rx[2]))
+	    yf = yhit * (yhit>ry[1]) * (yhit<ry[2]) + 
+	         yf * ((yhit<ry[1]) + (yhit>ry[2]))
+	    
+	    return xhit, yhit, xf, yf
+	end	
+
+	# Aperture function
+	function circulo(x,y,r)
+		1.0*(x^2+y^2 <= r^2)
+	end
+end;
+
+# ╔═╡ bbc61f2a-bf69-427a-aa95-29135e9d4493
+md"""
+The idea now is to adjust the two mirrors such that the beam passes through the center of a reference, for example, an aperture.  What strategy could you follow to align the beam?  For a fine adjustment, you can use the arrow keys when selecting the slider.
+"""
+
+# ╔═╡ a2f94c37-b54a-45d4-b60a-043d82fcc961
+md"""
+Angle of mirror 1 $(@bind phi1 Slider(59:0.01:69, default=59.1, show_value=true))
+
+Angle of mirror 2 $(@bind phi2 Slider(59:0.005:69, default=69.0, show_value=true))
+"""
+
+# ╔═╡ 65c48320-dbf6-4bae-81d4-b2cecd3ba246
+begin
+	p = plot()
+	
+	# Input rmax, angle and x0, y0
+	rmax = 10.0
+	thin = 1.0
+	x01 = 0.0
+	y01 = 0.0
+	
+	# Final coordinates of the initial beam
+	xf1 = rmax*cosd(thin) + x01
+	yf1 = rmax*sind(thin) + y01
+	
+	# Coordinates and angle of mirror 1
+	xm1 = 3.0
+	ym1 = 0.0
+	thmirror1 = phi1 # 62.001
+	
+	# Coordinates and angle of mirror 2
+	xm2 = 1.0
+	ym2 = 3.0
+	thmirror2 = phi2 #60.001
+
+	# Aperture coordinate
+	xAperture = [5 50]
+	yAperture = [3 3]
+	
+	# Collision with M1 -- collision(xm,ym,thmirror,x0,y0,xf,yf) --> return xhit, yhit, xf, yf
+	coll1 = collision(xm1,ym1,thmirror1,x01,y01,xf1,yf1)
+	thout1 = mirror(thin,thmirror1)
+	xf2 = rmax*cosd(thout1)+coll1[1]
+	yf2 = rmax*sind(thout1)+coll1[2]
+	
+	# Collision with M2 -- collision(xm,ym,thmirror,x0,y0,xf,yf) --> return xhit, yhit, xf, yf
+	coll2 = collision(xm2,ym2,thmirror2,coll1[1],coll1[2],xf2,yf2)
+	thout2 = mirror(thout1,thmirror2)
+	xf3 = 7rmax*cosd(thout2)+coll2[1]
+	yf3 = 7rmax*sind(thout2)+coll2[2]
+
+	# Collision with aperture
+	collAperture1 = collision(xAperture[1], yAperture[1], 89.99, coll2[1],coll2[2],xf3,yf3)
+	collAperture2 = collision(xAperture[2], yAperture[2], 89.99, coll2[1],coll2[2],xf3,yf3)
+	
+	# Draw Grid
+	p = scatter!(Xg[:] , Yg[:], markersize=1.0, color=:black)	
+			
+	# Draw lines
+	p = freespace(x01,y01,coll1[3],coll1[4],:red)
+	
+	# Collision in m1?
+	if coll1[1]==coll1[3]
+	    p = freespace(coll1[1],coll1[2],coll2[3],coll2[4],:red)
+	end
+	
+	# Collision in m2?
+	if coll2[1]==coll2[3]
+	    p = freespace(coll2[1],coll2[2],xf3,yf3,:red)
+	end
+	
+	# Draw optical elements
+	p = drawmirror(xm1,ym1,thmirror1)
+	p = drawmirror(xm2,ym2,thmirror2)
+	p = drawaperture(xAperture[1], yAperture[1], 90.0)
+	p = drawaperture(xAperture[2], yAperture[2], 90.0)
+	p = plot!(ylims=[-1,9], xlims=[0, 50], aspect_ratio=1, leg=:false, axis=:off)
+
+	p1 = heatmap(xs.+yAperture[1],ys,circulo.(Xs,Ys,1.0).-circulo.(Xs,Ys,0.1), colorbar=:false, aspect_ratio=1, color=:Blues)
+	p1 = scatter!([collAperture1[4] - 2.0*(collAperture1[4]-yAperture[1])],[0.0], axis=:off, ticks=:false, leg=:false, xlims=[1,5])
+		
+	p2 = heatmap(xs.+yAperture[1],ys,circulo.(Xs,Ys,1.0).-circulo.(Xs,Ys,0.1), colorbar=:false, aspect_ratio=1, color=:Blues)
+	p2 = scatter!([collAperture2[4] - 2.0*(collAperture2[4]-yAperture[1])],[0.0], axis=:off, ticks=:false, leg=:false, xlims=[1,5])
+	
+	plot(p, p1, p2, layout=@layout([a; b c]), title=[" " "Aperture 1 (near)" "Aperture 2 (far)"], titlefont = font(8), ticks=:false, size=(1000,600))
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -206,7 +224,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "426ef39a98ba88fe68aabe68f47491074a0b346f"
+project_hash = "007fbb57db0277a809224fb92fc2c3ad5ea07613"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1167,17 +1185,14 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─f15ac4e2-96ef-11ed-28e6-f97783f7fd33
-# ╟─3dd7bab3-2e6d-4f6d-b86f-f215f73d3077
-# ╟─48cf369f-1b8d-41c7-b7bb-abcf64d3d3ed
-# ╟─293ecaff-65f9-4013-a056-0ad375d3d769
-# ╟─5b35cba4-226b-4aa3-abb9-d70483880ea5
-# ╟─6b023357-5e1c-4a53-aa37-b2c007d8fe27
-# ╟─a60dd512-8c5d-4209-b527-4c0474b12566
-# ╟─d8ad6dfc-8aa3-4e80-a10f-438a27ae7b80
-# ╟─ce701571-a260-4cdb-84ec-e4fedccedc59
-# ╟─cdf04820-5195-4058-8fbd-01e6d763a1b9
-# ╟─6f34c2b1-da5b-40ad-ad48-447a7a238dff
-# ╟─08c3a497-ec85-4992-8a1f-aa806a62d273
+# ╠═d761da04-b71a-4b95-84cb-0d541a8eec35
+# ╟─d4f2e13a-6463-404b-8658-3b69d1f19533
+# ╟─5dd54161-3b2c-4162-8cd6-0ceea61d3483
+# ╟─01828d9d-ceaf-4162-8df6-9a3c32e68bdf
+# ╟─a8b0697f-0e02-4003-8336-86710d527884
+# ╟─5e4449d7-aed7-497c-967d-b8f3d39d70c3
+# ╟─bbc61f2a-bf69-427a-aa95-29135e9d4493
+# ╟─a2f94c37-b54a-45d4-b60a-043d82fcc961
+# ╟─65c48320-dbf6-4bae-81d4-b2cecd3ba246
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002

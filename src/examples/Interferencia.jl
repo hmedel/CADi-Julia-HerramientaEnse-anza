@@ -14,179 +14,294 @@ macro bind(def, element)
     end
 end
 
-# ╔═╡ f15ac4e2-96ef-11ed-28e6-f97783f7fd33
+# ╔═╡ 3c784ad0-97a9-11ed-2be0-67a470594574
 begin
 	using Plots
 	using PlutoUI
+	include("clasevectores.jl")
+	plotly()
 end
 
-# ╔═╡ 3dd7bab3-2e6d-4f6d-b86f-f215f73d3077
-md"""
-# Polarization
+# ╔═╡ 0888ca4c-d2d6-4e0d-a41a-b523d54e7667
+html"""<style>
+main {
+    max-width: 900px;
+}
 """
 
-# ╔═╡ 48cf369f-1b8d-41c7-b7bb-abcf64d3d3ed
+# ╔═╡ 20eab216-32a4-4fc8-8ef1-14f129219906
 md"""
-## Cartesian basis
-In this notebook we want to explore the vectorial nature of an electromagnetic wave. For that let us express an electromagnetic wave as
+# Two beam interference
 
-$\vec{E} = E_{0x} \cos(kz - \omega t)\hat{e}_x + E_{0y} \cos(kz - \omega t + \phi_y)\hat{e}_y,$
-where we have written the field in the cartesian polarization basis.
-
-In the numerical evaluation the blue line represents the $x$ component of the field, and the red plot represents the $y$ component.  Adjust the sliders to explore different polarization states.
+In this notebook we show the interference between two Gaussian beams with different $\vec{k}$ vectors. 
 """
 
-# ╔═╡ 5b35cba4-226b-4aa3-abb9-d70483880ea5
-@bind go1 Button("Restart")
+# ╔═╡ a42e2d04-c522-45ca-822b-8c52d2a77587
+md"""
+Now, we will define some functions (planes, lines and GB mode), as well as the beam parameters.
+"""
 
-# ╔═╡ 293ecaff-65f9-4013-a056-0ad375d3d769
+# ╔═╡ 19a2399d-abea-4dd3-8ff7-b92bcc659245
 begin
-	go1
+	function GaussBeam(x::Float64, y::Float64, z::Float64, w0::Float64, phi::Float64, lambda::Float64)
+	    GB::ComplexF64=0.0 + im*0.0
 	
-	# RUN THIS CELL (shift-enter) BEFORE START 
-	Ex = Float64[]
-	Ey = Float64[]
-	tt = Float64[]
+	    zr = pi*(w0^2)/lambda
+	    wz2 = (w0^2) * (1 + (z/zr)^2)
+	    wz = sqrt(wz2)
+	    rr2=(x^2 + y^2)/(wz2)
+	    C = sqrt(2/pi) * (1/w0)
+	    k = 2*pi/lambda
+	
+	    GB= C * exp(-im*rr2*z/zr) *
+	        exp(-rr2) * exp(-im*atan(z,zr)) * exp(im*(phi))
+		
+	    return GB::Complex{Float64}
+	end
 
-	deltaT = 1/20
-	@bind ticks Clock(deltaT,true)
+	planeX(u,v,ax,bx,r0x) = r0x + u*ax + v*bx
+	planeY(u,v,ay,by,r0y) = r0y + u*ay + v*by
+	planeZ(u,v,az,bz,r0z) = r0z + u*az + v*bz	
+
+	lineX(t,ax,x0) = x0 + ax*t
+	lineY(t,ay,y0) = y0 + ay*t
+	lineZ(t,az,z0) = z0 + az*t
 end
 
-# ╔═╡ 6b023357-5e1c-4a53-aa37-b2c007d8fe27
+# ╔═╡ 7a65de88-c843-48c5-967f-89c8bc06ea01
 md"""
-E0x $(@bind E0x Slider(0.0:0.01:0.5, default=0.25, show_value=true))
-
-E0y $(@bind E0y Slider(0.0:0.01:0.5, default=0.25, show_value=true))
-
-phiy $(@bind phiy Slider(0.0:pi/64:pi, default=0.0, show_value=true))
-
-angle1 $(@bind anA Slider(0.0:1.0:90, default=45.0, show_value=true))
-angle2 $(@bind anP Slider(0.0:1.0:90, default=45.0, show_value=true))
+## Visualization
 """
 
-# ╔═╡ a60dd512-8c5d-4209-b527-4c0474b12566
-begin
-	# Parameters
-	z = 0.0
-	c = 4
-	lambda = 1.0
-	f = c/lambda
-	k = 2.0*pi/lambda
-	w = 2.0*pi*f
-
-	# Electric field components
-	t = ticks*deltaT/30
-	push!(tt,t)
-	push!(Ex,E0x * cos(k*z - w*t))
-	push!(Ey,E0y * cos(k*z - w*t + phiy))
-
-	if ticks==1
-		p = Plots.plot(proj_type = :persp)
-	end
-	
-	# How fast?
-	visualfactor=1/7
-	p = Plots.plot(Ex,Ey,w*visualfactor*tt,color=:black,linewidth=1.0,leg=:false)	
-
-	p = Plots.plot3d!([Ex; Ex[end]], [ones(size(Ey)); Ey[end]],[w*tt*visualfactor;w*tt[end]*visualfactor],
-		color=:blue,linewidth=0.5,leg=:false)
-	
-	p = Plots.plot3d!([-ones(size(Ex)); Ex[end]], [Ey; Ey[end]],[w*tt*visualfactor;w*tt[end]*visualfactor],
-		color=:red,linewidth=0.5,leg=:false)
-	zmax1=10
-	if w*tt[end]*visualfactor>10
-		zmax1=w*tt[end]*visualfactor+0.1
-	end
-	Plots.plot(p,xlims=[-1,1],ylims=[-1,1],zlims=[0,zmax1],
-			   proj_type = :persp, aspect_ratio=1,camera=(anA,anP),size=(600,600))
-end
-
-# ╔═╡ d8ad6dfc-8aa3-4e80-a10f-438a27ae7b80
+# ╔═╡ 8bf96877-ebc3-42de-bc53-eff96632415c
 md"""
-## Circular basis
-
-Let us express an electromagnetic wave as
-
-$\vec{E} = E_{0L}\hat{e}_L + E_{0R} \exp(i\phi_R)\hat{e}_R,$
-where we have expressed the field in the circular polarization basis.
+The variable Angle1 controls the angle between both beams. Explore the behaviour of the interference fringes as you change the Angle1 value and the phase difference.
 """
 
-# ╔═╡ cdf04820-5195-4058-8fbd-01e6d763a1b9
-@bind go2 Button("Restart")
-
-# ╔═╡ ce701571-a260-4cdb-84ec-e4fedccedc59
-begin
-	go2
-	
-	# RUN THIS CELL (shift-enter) BEFORE START 
-	ExL = Complex[]
-	EyL = Complex[]
-	ExR = Complex[]
-	EyR = Complex[]
-	ttC = Float64[]
-
-	deltaTC = 1/20
-	@bind ticksC Clock(deltaTC,true)
-end
-
-# ╔═╡ 6f34c2b1-da5b-40ad-ad48-447a7a238dff
+# ╔═╡ 04d6e0fb-467c-4f8e-b22e-15cbedde3bd9
 md"""
-E0L $(@bind E0L Slider(0.0:0.01:1.5, default=1.0, show_value=true))
+Angle1 $(@bind angul1 Slider(0:0.0001:0.0015, default=0.0015, show_value=true))
 
-E0R $(@bind E0R Slider(0.0:0.01:1.5, default=1.0, show_value=true))
+Phase difference $(@bind deltaphi Slider(0:pi/16:2pi, default=0.0, show_value=true))
 
-phiR $(@bind phiR Slider(0.0:pi/64:pi, default=0.0, show_value=true))
-
-anglec1 $(@bind ancA Slider(0.0:1.0:90, default=45.0, show_value=true))
-anglec2 $(@bind ancP Slider(0.0:1.0:90, default=45.0, show_value=true))
+correction $(@bind correct CheckBox())
 """
 
-# ╔═╡ 08c3a497-ec85-4992-8a1f-aa806a62d273
+# ╔═╡ f2d9be3e-f522-4426-906c-3c74a74d0051
 begin
-	# Parameters
-	zC = 0.0
-	cC = 4
-	lambdaC = 1.0
-	fC = cC/lambdaC
-	kC = 2.0*pi/lambdaC
-	wC = 2.0*pi*fC
-
-	# Electric field components
-	tC = ticksC*deltaT/30
-	push!(ttC,tC)
-	push!(ExL,E0L * (1/sqrt(2)) * exp(im*(kC*zC - wC*tC)))
-	push!(EyL,-E0L*im*(1/sqrt(2)) * exp(im*(kC*zC - wC*tC)))
-	push!(ExR,E0R * (1/sqrt(2)) * exp(im*(kC*zC - wC*tC + phiR)))
-	push!(EyR,E0R*im*(1/sqrt(2)) * exp(im*(kC*zC - wC*tC + phiR)))
-
-	EX2 = (ExL .+ ExR)
-	EY2 = (EyL .+ EyR)
+	# Beam parameters
+	lamb = 633E-9
+	w0 = 3E-3
+	zr = (pi*w0^2)/lamb
+	# Wave vector components for beam 1
+	k1 = 2pi/lamb
+	thx1 = angul1 #pi/64   # Add slider to this one!
+	thy1 = 0
+	kx1 = k1*sin(thx1)
+	ky1 = k1*sin(thy1)
+	kz1 = sqrt(k1^2- kx1^2 - ky1^2);
 	
-	if ticksC==1
-		p2 = Plots.plot()
+	# Wave vector components for beam 2
+	k2 = 2pi/lamb
+	thx2 = -thx1
+	thy2 = 0
+	kx2 = k2*sin(thx2)
+	ky2 = k2*sin(thy2)
+	kz2 = sqrt(k2^2- kx2^2 - ky2^2);
+	
+	# Divergence of the beam
+	thdiv = 180*lamb/(pi*w0)/pi
+end;
+
+# ╔═╡ ca575361-2664-415b-8e4a-1007df643e01
+begin
+	# Size of numerical window in the XYplane
+	xmax = 1.5*w0
+	ymax = 1.5*w0
+
+	# Size of numerical windows for interference in the bottom
+	xmax2 = 3*w0
+	ymax2 = 3*w0
+	
+	# Calculation of maximum z 
+	zp = 2.0
+	zmax = zp/cos(thx1)
+	
+	pointsXY = 32
+	pointsXYhr = 256
+	pointsz = 16
+	
+	# Generates ranges for xs and ys... also xs2 and ys2
+	xs = xmax*(2/pointsXYhr)*collect(range(-pointsXYhr/2,length=pointsXYhr,stop=pointsXYhr/2-1))
+	ys = ymax*(2/pointsXYhr)*collect(range(-pointsXYhr/2,length=pointsXYhr,stop=pointsXYhr/2-1))
+	xs2 = xmax2*(2/pointsXYhr)*collect(range(-pointsXYhr/2,length=pointsXYhr,stop=pointsXYhr/2-1))
+	ys2 = ymax2*(2/pointsXYhr)*collect(range(-pointsXYhr/2,length=pointsXYhr,stop=pointsXYhr/2-1))
+	zs = collect(range(0.0,length=pointsz,stop=zmax))
+	
+	# Generates matrices Matlab-style
+	mx, ny = length(xs), length(ys)
+	Xs = reshape(xs, mx, 1)
+	Ys = reshape(ys, 1, ny);
+	Xs2 = reshape(xs2, mx, 1)
+	Ys2 = reshape(ys2, 1, ny);
+	
+	# Size of numerical window in the UV plane
+	pointsu = pointsXY
+	pointsv = pointsXY
+	umax = 3*w0
+	vmax = 3*w0
+	umin = -3*w0
+	vmin = -3*w0
+	
+	# Generates ranges for xs and ys
+	us = collect(range(umin,length=pointsu,stop=umax))
+	vs = collect(range(vmin,length=pointsv,stop=vmax))
+	
+	# Generates matrices Matlab-style
+	umx, vny = length(us), length(vs)
+	Us = reshape(us, 1, umx)
+	Vs = reshape(vs, vny, 1);
+	
+	# Propagation
+	pointst = pointsz
+	ts = collect(range(0.0,length=pointst,stop=zmax));
+end;
+
+# ╔═╡ 7069cebd-4bef-44a9-90ea-935da62c5efe
+begin
+	# BEAM 1
+	# normal unitary vector
+	normalx1 = kx1/k1
+	normaly1 = ky1/k1
+	normalz1 = kz1/k1
+	
+	# test vector
+	testx1 = 1.0
+	testy1 = 0.0
+	testz1 = 0.0
+	
+	# vector 1
+	vec1x1 = normaly1*testz1 - normalz1*testy1
+	vec1y1 = -(normalx1*testz1 - normalz1*testx1)
+	vec1z1 = normalx1*testy1 - normaly1*testx1
+	normvec11 = sqrt(vec1x1^2 + vec1y1^2 + vec1z1^2)
+	unit1x1 = vec1x1/normvec11
+	unit1y1 = vec1y1/normvec11
+	unit1z1 = vec1z1/normvec11
+	
+	# vector 2
+	vec2x1 = unit1y1*normalz1 - unit1z1*normaly1
+	vec2y1 = -(unit1x1*normalz1 - unit1z1*normalx1)
+	vec2z1 = unit1x1*normaly1 - unit1y1*normalx1
+	normvec21 = sqrt(vec2x1^2 + vec2y1^2 + vec2z1^2)
+	unit2x1 = vec2x1/normvec21
+	unit2y1 = vec2y1/normvec21
+	unit2z1 = vec2z1/normvec21
+	
+	# BEAM 2
+	# normal unitary vector
+	normalx2 = kx2/k2
+	normaly2 = ky2/k2
+	normalz2 = kz2/k2
+	
+	# test vector
+	testx2 = 1.0
+	testy2 = 0.0
+	testz2 = 0.0
+	
+	# vector 1
+	vec1x2 = normaly2*testz2 - normalz2*testy2
+	vec1y2 = -(normalx2*testz2 - normalz2*testx2)
+	vec1z2 = normalx2*testy2 - normaly2*testx2
+	normvec12 = sqrt(vec1x2^2 + vec1y2^2 + vec1z2^2)
+	unit1x2 = vec1x2/normvec12
+	unit1y2 = vec1y2/normvec12
+	unit1z2 = vec1z2/normvec12
+	
+	# vector 2
+	vec2x2 = unit1y2*normalz2 - unit1z2*normaly2
+	vec2y2 = -(unit1x2*normalz2 - unit1z2*normalx2)
+	vec2z2 = unit1x2*normaly2 - unit1y2*normalx2
+	normvec22 = sqrt(vec2x2^2 + vec2y2^2 + vec2z2^2)
+	unit2x2 = vec2x2/normvec22
+	unit2y2 = vec2y2/normvec22
+	unit2z2 = vec2z2/normvec22
+
+	# x0,y0,z0 
+	x0 = sqrt(zmax^2 - zp^2)
+	y0 = 0.0
+	z0 = 0.0
+	
+	LX1 = lineX(ts[1],normalx1,-x0)
+	LY1 = lineY(ts[1],normaly1,y0)
+	LZ1 = lineZ(ts[1],normalz1,z0)
+
+	LX2 = lineX(ts[1],normalx2,x0)
+	LY2 = lineY(ts[1],normaly2,y0)
+	LZ2 = lineZ(ts[1],normalz2,z0)
+end;
+
+# ╔═╡ 8c76a858-0350-4c80-9a75-83cfa8dd87d4
+begin
+	GB = abs2.(GaussBeam.(Us,Vs,zs[1],w0,0.0,lamb))
+	GBxy = GaussBeam.(Xs,Ys,0.0,w0,0.0,lamb)
+	GB1 = GaussBeam.(Xs2.-x0,Ys2,0.0,w0,0.0,lamb)
+	GB2 = GaussBeam.(Xs2.+x0,Ys2,0.0,w0,0.0,lamb)
+	
+	GBxy = GBxy./((2)*maximum(abs.(GBxy)))
+	GB = GB./((2)*maximum(abs.(GB)))
+	GB1 = GB1./((2)*maximum(abs.(GB1)))
+	GB2 = GB2./((2)*maximum(abs.(GB2)))
+end;
+
+# ╔═╡ 81a4fd1b-4f7e-46a5-ba1c-1e62d5527c81
+begin
+	p = plot(bg=RGB(0.0,0.0,0.0))
+	
+	# Interference
+	INTGB = abs2.(GBxy.*exp.(im*(kx1*Xs .+ ky1*Ys .+ deltaphi)) .+ GBxy.*exp.(im*(kx2*Xs .+ ky2*Ys)))
+	INTGB0 = abs2.(GB1.*exp.(im*(kx1*Xs2 .+ ky1*Ys2 .+ deltaphi)) + GB2.*exp.(im*(kx2*Xs2 .+ ky2*Ys2)))
+	# INTGB = INTGB./maximum(INTGB)
+	
+	INTGB[1,1] = 1.0
+	INTGB[1,2] = 0.0
+	INTGB0[1,1] = 1.0
+	INTGB0[1,2] = 0.0
+
+	if correct
+		p = surface!(planeX.(Xs2,Ys2,1,0,0),
+	    				planeY.(Xs2,Ys2,0,1,0),
+					    planeZ.(Xs2,Ys2,0,0,0),
+					    color=:grays, fill_z = INTGB0,
+					    alpha=0.8, colorbar=:false)
+	else
+		p = surface!(planeX.(Us,Vs,unit1x2,unit2x2,LX2),
+						planeY.(Us,Vs,unit1y2,unit2y2,LY2),
+						planeZ.(Us,Vs,unit1z2,unit2z2,LZ2),
+						color=:grays, fill_z = GB,
+						alpha=0.6, colorbar=:false)
+		
+		p = surface!(planeX.(Us,Vs,unit1x1,unit2x1,LX1),
+						planeY.(Us,Vs,unit1y1,unit2y1,LY1),
+						planeZ.(Us,Vs,unit1z1,unit2z1,LZ1),
+						color=:grays, fill_z = GB,
+						alpha=0.5, colorbar=:false)
+
+
 	end
 
-	visualfactorC=1/7
-	p2 = Plots.plot3d(real.(EX2), real.(EY2),wC*visualfactorC*ttC,
-					  color=:black,linewidth=1.0,leg=:false)
+	p = surface!(planeX.(Xs,Ys,1,0,0),
+	    				planeY.(Xs,Ys,0,1,0),
+					    planeZ.(Xs,Ys,0,0,zmax),
+					    color=:grays, fill_z = INTGB,
+					    alpha=1.0, colorbar=:false)
+
+	p = flechasimple(-x0,y0,z0, normalx1,normaly1,normalz1)
+
+	p = flechasimple(x0,y0,z0, normalx2,normaly2,normalz2)
 	
-	p2 = Plots.plot3d!([real.(ExL).-4.0; real(ExL[end]); 0.0], 
-					   [real.(EyL); real(EyL[end]); 0.0],
-				       [wC*visualfactorC*ttC; wC*visualfactorC*ttC[end]; 
-                        wC*visualfactorC*ttC[end]], 
-						color=:blue,linewidth=0.5,leg=:false)
-	
-	p2 = Plots.plot3d!([real.(ExR); real(ExR[end]);0.0], 
-						[real.(EyR).+4.0;real(EyR[end]);0.0],
-						[wC*visualfactorC*ttC; wC*visualfactorC*ttC[end]; 
-						 wC*visualfactorC*ttC[end]],
-						 color=:red,linewidth=0.5,leg=:false)
-	zmaxx=10
-	if wC*visualfactorC*ttC[end]>10
-		zmaxx = wC*visualfactorC*ttC[end]+0.1
-	end
-	Plots.plot(p2,xlims=[-5.0,5.0],ylims=[-5.0,5.0],zlims=[0,zmaxx],
-			    proj_type = :persp, aspect_ratio=1,camera=(ancA,ancP),size=(600,600))
+	# ejes(1.25zp;multi=35,cl=:red)
+	plot!(p, camera=(45,45), leg=:false, xlims = [-0.01,0.01], ylims = [-0.01,0.01], zlims = [-0.1,1.2zp], size=(800,800))
 end
 
 # ╔═╡ 00000000-0000-0000-0000-000000000001
@@ -206,7 +321,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "426ef39a98ba88fe68aabe68f47491074a0b346f"
+project_hash = "007fbb57db0277a809224fb92fc2c3ad5ea07613"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1167,17 +1282,18 @@ version = "1.4.1+0"
 """
 
 # ╔═╡ Cell order:
-# ╟─f15ac4e2-96ef-11ed-28e6-f97783f7fd33
-# ╟─3dd7bab3-2e6d-4f6d-b86f-f215f73d3077
-# ╟─48cf369f-1b8d-41c7-b7bb-abcf64d3d3ed
-# ╟─293ecaff-65f9-4013-a056-0ad375d3d769
-# ╟─5b35cba4-226b-4aa3-abb9-d70483880ea5
-# ╟─6b023357-5e1c-4a53-aa37-b2c007d8fe27
-# ╟─a60dd512-8c5d-4209-b527-4c0474b12566
-# ╟─d8ad6dfc-8aa3-4e80-a10f-438a27ae7b80
-# ╟─ce701571-a260-4cdb-84ec-e4fedccedc59
-# ╟─cdf04820-5195-4058-8fbd-01e6d763a1b9
-# ╟─6f34c2b1-da5b-40ad-ad48-447a7a238dff
-# ╟─08c3a497-ec85-4992-8a1f-aa806a62d273
+# ╟─3c784ad0-97a9-11ed-2be0-67a470594574
+# ╟─0888ca4c-d2d6-4e0d-a41a-b523d54e7667
+# ╟─20eab216-32a4-4fc8-8ef1-14f129219906
+# ╟─a42e2d04-c522-45ca-822b-8c52d2a77587
+# ╟─19a2399d-abea-4dd3-8ff7-b92bcc659245
+# ╟─7a65de88-c843-48c5-967f-89c8bc06ea01
+# ╟─8bf96877-ebc3-42de-bc53-eff96632415c
+# ╟─04d6e0fb-467c-4f8e-b22e-15cbedde3bd9
+# ╟─f2d9be3e-f522-4426-906c-3c74a74d0051
+# ╟─ca575361-2664-415b-8e4a-1007df643e01
+# ╟─7069cebd-4bef-44a9-90ea-935da62c5efe
+# ╟─8c76a858-0350-4c80-9a75-83cfa8dd87d4
+# ╟─81a4fd1b-4f7e-46a5-ba1c-1e62d5527c81
 # ╟─00000000-0000-0000-0000-000000000001
 # ╟─00000000-0000-0000-0000-000000000002
