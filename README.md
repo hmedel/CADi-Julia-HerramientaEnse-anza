@@ -7,6 +7,8 @@ Aprender de manera práctica el uso de Julia y Pluto.jl como herramienta para la
 
 ## Temario
 1.  Presentación
+1.  Crash course de Julia
+1.  Editores y notebooks
 1.  Instalación de Pluto
 1.  Uso práctico con ejemplos
 1.  Graficación
