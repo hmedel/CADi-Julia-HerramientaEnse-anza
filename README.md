@@ -31,7 +31,7 @@ https://drive.google.com/drive/folders/1kTnkVIQSkXp0wsZPsNR29hre_X1QJmxR?usp=sha
 El repositorio está organizado de la siguiente manera:
 
 - **src** -- códigos (.jl) usados en las sesiones.  La versión en pdf de lo visto en las sesiones está en la **raíz** del repositorio.
-    - **ejemplos**
+    - **examples** -- códigos de ejemplos (.jl)
 
 - **hw** -- tareas del taller.
 
