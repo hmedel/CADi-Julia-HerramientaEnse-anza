@@ -15,7 +15,7 @@ Aprender de manera práctica el uso de Julia y Pluto.jl como herramienta para la
 1.  Integración de paquetes
 1.  Uso de SymPy.jl
 1.  PlutoUI, creación de notebooks interactivas
-1.  PlutoSlideServer
+1.  PlutoSlideServer (opcional)
 
 
 ## Fechas y horarios
