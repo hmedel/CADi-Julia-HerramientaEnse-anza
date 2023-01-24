@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.19
+# v0.19.20
 
 using Markdown
 using InteractiveUtils
@@ -76,12 +76,6 @@ Algunos puntos importantes:
 - El rastreo de las dependencias de las celdas, crea un problema si volvemos a definir variables en celdas posteriores.
 """
 
-# ╔═╡ 1e83a25a-b34f-4f2c-8461-8a7655ce948d
-# ╠═╡ disabled = true
-#=╠═╡
-a = 0
-  ╠═╡ =#
-
 # ╔═╡ ae48ec5f-df4d-4055-8407-2f92c31f2886
 md"""
 ## Bloques de código
@@ -123,12 +117,6 @@ let # El scope de las variables definidas es local
 	f = 2
 	e = 2+a+f
 end
-
-# ╔═╡ 73ade741-0eae-45df-bc8a-8e32dd836415
-# ╠═╡ disabled = true
-#=╠═╡
-f
-  ╠═╡ =#
 
 # ╔═╡ 8ef039c9-d703-43b9-b757-32603b6dd7ff
 d
@@ -311,9 +299,19 @@ f(0), f(1; A=2), f(0; w=2)
 
 # ╔═╡ 74f2c9ab-315b-4629-9b54-97d0cd9b49f5
 begin
-	xs = range(-5.0, 5.0, 128)
+	#range(-5.0, 5.0, 128) <-- esa sintaxis funciona a partir de la v1.8
+	xs = range(-5.0,length=128,stop=5.0) 
 	plot(xs, f.(xs))
 end
+
+# ╔═╡ 4fd9f34d-4494-4f55-aed7-09a1916325ca
+collect(range(-5.0, 5.0, length=11))
+
+# ╔═╡ 012bbf04-8774-4126-8ee6-a775334afee7
+collect(range(-5.0,length=11,stop=5.0))
+
+# ╔═╡ afb8d2c2-5a81-4d8b-9e8b-b0f8881156e9
+collect(-1.0:2/10:1.0)
 
 # ╔═╡ d95854e8-c119-46b3-9475-397df4c110c3
 md"""
@@ -409,7 +407,7 @@ PLUTO_MANIFEST_TOML_CONTENTS = """
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "007fbb57db0277a809224fb92fc2c3ad5ea07613"
+project_hash = "426ef39a98ba88fe68aabe68f47491074a0b346f"
 
 [[deps.AbstractPlutoDingetjes]]
 deps = ["Pkg"]
@@ -1377,14 +1375,12 @@ version = "1.4.1+0"
 # ╠═445b6508-62b5-4746-8480-26dcf2d81b4d
 # ╠═2bcec253-619e-40aa-9b4a-beaa9bc8f926
 # ╟─454af1f5-4537-4d96-8e66-b70af329a618
-# ╠═1e83a25a-b34f-4f2c-8461-8a7655ce948d
 # ╟─ae48ec5f-df4d-4055-8407-2f92c31f2886
 # ╟─50ead02f-642a-41a3-822e-cc972ed0e6a0
 # ╟─a8c63aac-a38a-4983-84ae-399501715bbc
 # ╟─9a88b399-0d53-4d75-9a05-ac3305578853
 # ╠═f7d2a895-5e9d-47ca-a9b7-80f574c8d85d
 # ╠═6993f2cd-46e1-43fa-a9ef-6d25a01dee10
-# ╠═73ade741-0eae-45df-bc8a-8e32dd836415
 # ╠═8ef039c9-d703-43b9-b757-32603b6dd7ff
 # ╟─f74a8ee3-5e80-4468-9808-f033e5b47cfd
 # ╠═55b03830-ae8a-4e21-8b74-3d58a3116fe0
@@ -1422,6 +1418,9 @@ version = "1.4.1+0"
 # ╠═57c61da7-20b0-4881-9d88-7a59654976a0
 # ╠═aae849ad-f805-43cb-8eff-29c5b0a7a7b2
 # ╠═74f2c9ab-315b-4629-9b54-97d0cd9b49f5
+# ╠═4fd9f34d-4494-4f55-aed7-09a1916325ca
+# ╠═012bbf04-8774-4126-8ee6-a775334afee7
+# ╠═afb8d2c2-5a81-4d8b-9e8b-b0f8881156e9
 # ╟─d95854e8-c119-46b3-9475-397df4c110c3
 # ╠═489c9d0a-efbb-4d1f-acdf-8cd74aeb9419
 # ╠═7c68623b-8d1c-4ce2-9b1d-bc3c37b65486
