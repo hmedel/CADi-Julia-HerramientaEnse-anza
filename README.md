@@ -37,7 +37,7 @@ El repositorio está organizado de la siguiente manera:
 
 ## Equipos de trabajo
 
-Equipo 1
+**Equipo 1**
 
 Pedro
 
@@ -46,7 +46,7 @@ Ricardo
 Ramona
 
 
-Equipo 2
+**Equipo 2**
 
 Alejandro
 
@@ -55,7 +55,7 @@ Miguel
 Carlos Martinez
 
 
-Equipo 3
+**Equipo 3**
 
 Raul
 
@@ -64,7 +64,7 @@ Servando
 Octavio
 
 
-Equipo 4
+**Equipo 4**
 
 Alfonso
 
@@ -73,7 +73,7 @@ Esteban
 Victor
 
 
-Equipo 5
+**Equipo 5**
 
 Jorge
 
@@ -82,7 +82,7 @@ Carlos Cardoso
 Sergio
 
 
-Equipo 6
+**Equipo 6**
 
 Daniel
 
