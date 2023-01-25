@@ -36,6 +36,7 @@ El repositorio está organizado de la siguiente manera:
 - **hw** -- tareas del taller.
 
 ## Equipos de trabajo
+
 Equipo 1
 
 Pedro
@@ -43,6 +44,7 @@ Pedro
 Ricardo
 
 Ramona
+
 
 Equipo 2
 
@@ -52,6 +54,7 @@ Miguel
 
 Carlos Martinez
 
+
 Equipo 3
 
 Raul
@@ -59,6 +62,7 @@ Raul
 Servando
 
 Octavio
+
 
 Equipo 4
 
@@ -68,6 +72,7 @@ Esteban
 
 Victor
 
+
 Equipo 5
 
 Jorge
@@ -75,6 +80,7 @@ Jorge
 Carlos Cardoso
 
 Sergio
+
 
 Equipo 6
 
