@@ -37,58 +37,58 @@ El repositorio está organizado de la siguiente manera:
 
 ## Equipos de trabajo
 
-**Equipo 1**
+### Equipo 1
 
-Pedro
+- Pedro
 
-Ricardo
+- Ricardo
 
-Ramona
-
-
-**Equipo 2**
-
-Alejandro
-
-Miguel
-
-Carlos Martinez
+- Ramona
 
 
-**Equipo 3**
+### Equipo 2
 
-Raul
+- Alejandro
 
-Servando
+- Miguel
 
-Octavio
-
-
-**Equipo 4**
-
-Alfonso
-
-Esteban
-
-Victor
+- Carlos Martinez
 
 
-**Equipo 5**
+### Equipo 3
 
-Jorge
+- Raul
 
-Carlos Cardoso
+- Servando
 
-Sergio
+- Octavio
 
 
-**Equipo 6**
+### Equipo 4
 
-Daniel
+- Alfonso
 
-Marco
+- Esteban
 
-Julio
+- Victor
+
+
+### Equipo 5
+
+-Jorge
+
+-Carlos Cardoso
+
+- Sergio
+
+
+### Equipo 6
+
+- Daniel
+
+- Marco
+
+- Julio
 
 ## Sitios importantes
 https://julialang.org/
