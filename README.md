@@ -63,6 +63,8 @@ El repositorio está organizado de la siguiente manera:
 
 - Octavio
 
+- Lorenza
+
 
 ###### Equipo 4
 
