@@ -75,9 +75,9 @@ El repositorio está organizado de la siguiente manera:
 
 ### Equipo 5
 
--Jorge
+- Jorge
 
--Carlos Cardoso
+- Carlos Cardoso
 
 - Sergio
 
